@@ -5,8 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Kingdom extends Model
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class Kingdom extends Authenticatable
 {
+    use HasApiTokens;
+
     protected $fillable = [
         'name',
         'api_token',
