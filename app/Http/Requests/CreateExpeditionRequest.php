@@ -17,6 +17,7 @@ class CreateExpeditionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'kingdom_id' => ['required', 'integer', 'exists:kingdoms,id'],
             'journey_description' => ['required', 'string'],
 
             'participants' => ['required', 'array', 'min:1'],
