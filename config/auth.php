@@ -36,6 +36,18 @@ return [
     */
 
     'guards' => [
+
+        'kingdom' => [
+            'driver' => 'sanctum',
+            'provider' => 'kingdoms',
+        ],
+
+        'council' => [
+            'driver' => 'sanctum',
+            'provider' => 'council_members',
+    ],
+
+
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
@@ -60,6 +72,16 @@ return [
     */
 
     'providers' => [
+        'kingdoms' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Kingdom::class,
+        ],
+
+        'council_members' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\CouncilMember::class,
+        ],
+        
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
