@@ -42,4 +42,14 @@ class Expedition extends Model
     {
        return $this->belongsTo(CouncilMember::class, 'decision_by');
     }
+
+        public function singleParticipants(): HasMany
+    {
+        return $this->hasMany(Participant::class);
+    }
+
+    public function singleArtifacts(): HasMany
+    {
+        return $this->hasMany(Artifact::class);
+    }
 }
