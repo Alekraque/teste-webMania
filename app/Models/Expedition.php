@@ -6,16 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Enums\ExpeditionStatus;
 
 class Expedition extends Model
 {
     use HasUuids;
+
+    protected $casts = [
+        'status' => ExpeditionStatus::class,
+        'decision_at' => 'datetime'
+    ];
+
     protected $fillable = [
         'protocol',
         'kingdom_id',
         'journey_description',
         'status',
-        'rejection_reason',
+        'decision_reason',
         'decision_by',
         'decided_at',
     ];
@@ -38,7 +45,7 @@ class Expedition extends Model
         return $this->hasMany(ExpeditionArtifact::class);
     }
 
-    public function councilMembers(): BelongsTo 
+    public function councilMember(): BelongsTo 
     {
        return $this->belongsTo(CouncilMember::class, 'decision_by');
     }
