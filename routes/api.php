@@ -4,7 +4,13 @@ use App\Http\Controllers\ExpeditionController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Expedition;
 use App\Http\Requests\CreateExpeditionRequest;
+use App\Http\Controllers\Auth\CouncilAuthController;
+use App\Http\Controllers\Auth\KingdomAuthController;
 
+
+//logins
+Route::post('/kingdom/login', [KingdomAuthController::class, 'login']);
+Route::post('/council/login', [CouncilAuthController::class, 'login']);
 
 //rota pra criação das expedições
 Route::post('/expeditions', [ExpeditionController::class, 'store']);

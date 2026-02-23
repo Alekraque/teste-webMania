@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('kingdoms', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('api_token')->nullable();
+            $table->string('email')->unique();
+            $table->string('password');
             $table->timestamps();
         });
     }

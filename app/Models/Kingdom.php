@@ -14,7 +14,8 @@ class Kingdom extends Authenticatable
 
     protected $fillable = [
         'name',
-        'api_token',
+        'email',
+        'password'
     ];
 
     public function expeditions(): HasMany
