@@ -14,6 +14,7 @@ Route::post('/council/login', [CouncilAuthController::class, 'login']);
 
 //register
 Route::post('/kingdom/register', [KingdomAuthController::class, 'register']);
+Route::post('/council/register', [CouncilAuthController::class, 'register']);
 
 //rota pra criação das expedições
 Route::post('/expeditions', [ExpeditionController::class, 'store']);
