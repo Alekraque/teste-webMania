@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class CreateExpeditionRequest extends FormRequest
+class CreateExpeditionRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
