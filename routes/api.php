@@ -8,6 +8,11 @@ use App\Http\Controllers\Auth\CouncilAuthController;
 use App\Http\Controllers\Auth\KingdomAuthController;
 
 
+//pretected routes
+Route::middleware('auth:council')->group(function () {
+    Route::post('/council/register', [CouncilAuthController::class, 'register']);
+});
+
 //logins
 Route::post('/kingdom/login', [KingdomAuthController::class, 'login']);
 Route::post('/council/login', [CouncilAuthController::class, 'login']);
