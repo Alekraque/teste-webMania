@@ -6,11 +6,16 @@ use App\Models\Expedition;
 use App\Http\Requests\CreateExpeditionRequest;
 use App\Http\Controllers\Auth\CouncilAuthController;
 use App\Http\Controllers\Auth\KingdomAuthController;
+use App\Http\Controllers\ExpeditionDecisionController;
 
 
 //pretected routes
 Route::middleware('auth:council')->group(function () {
     Route::post('/council/register', [CouncilAuthController::class, 'register']);
+});
+
+Route::middleware(['auth:council'])->group(function () {
+    Route::patch('/expeditions/{protocol}/decision', [ExpeditionDecisionController::class, 'decide']);
 });
 
 //logins
@@ -25,4 +30,4 @@ Route::post('/council/register', [CouncilAuthController::class, 'register']);
 Route::post('/expeditions', [ExpeditionController::class, 'store']);
 
 //rota pra decidir sobre a expedição que ja existe
-Route::patch(`expeditions/{id}/decision`);
+Route::patch('/expeditions/{protocol}/decision', [ExpeditionDecisionController::class, 'decide']);
