@@ -24,15 +24,19 @@ class ExpeditionController
 
             foreach ($data['participants'] as $participant) {
                 $expedition->participants()->create($participant);
+                $expedition->singleParticipants()->create($participant);
             }
 
             foreach ($data['artifacts'] as $artifact) {
                 $expedition->artifacts()->create($artifact);
+                $expedition->singleArtifacts()->create($artifact);
             }
 
             DB::commit();
 
-            return response()->json($expedition->load(['participants', 'artifacts']), 201);
+            return response()->json(
+                $expedition->load(['participants', 'artifacts', 'singleParticipants', 'singleArtifacts']
+                ), 201);            
 
         } catch (\Throwable $th) {
             DB::rollBack();
