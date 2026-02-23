@@ -14,7 +14,7 @@ class Expedition extends Model
 
     protected $casts = [
         'status' => ExpeditionStatus::class,
-        'decision_at' => 'datetime'
+        'decided_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -22,7 +22,7 @@ class Expedition extends Model
         'kingdom_id',
         'journey_description',
         'status',
-        'decision_reason',
+        'rejection_reason',
         'decision_by',
         'decided_at',
     ];
