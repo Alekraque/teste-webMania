@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\UseCases\GetExpeditionStatusUseCase;
+use App\Domain\Enums\ExpeditionStatus;
+use App\Http\Requests\GetExpeditionStatusRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Http\Requests\CreateExpeditionRequest;
@@ -9,6 +12,30 @@ use App\Models\Expedition;
 
 class ExpeditionController
 {
+    public function status(
+        GetExpeditionStatusRequest $request,
+        string $protocol,
+        GetExpeditionStatusUseCase $useCase
+    )
+    {
+        $expedition = $useCase->execute($protocol);
+
+        $response = [
+            'protocol' => $expedition->protocol,
+            'status' => $expedition->status->value,
+            'last_updated_at' => $expedition->updated_at?->toISOString(),
+        ];
+
+        if (
+            $expedition->status === ExpeditionStatus::REJECTED &&
+            ! empty($expedition->rejection_reason)
+        ) {
+            $response['rejection_reason'] = $expedition->rejection_reason;
+        }
+
+        return response()->json($response);
+    }
+
 	public function store(CreateExpeditionRequest $req)
 	{
 		$data = $req->validated();

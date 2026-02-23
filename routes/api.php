@@ -18,6 +18,11 @@ Route::middleware(['auth:council'])->group(function () {
     Route::patch('/expeditions/{protocol}/decision', [ExpeditionDecisionController::class, 'decide']);
 });
 
+//consult expedition status
+Route::middleware(['auth:kingdom,council'])->group(function () {
+    Route::get('/expeditions/{protocol}/status', [ExpeditionController::class, 'status']);
+});
+
 //logins
 Route::post('/kingdom/login', [KingdomAuthController::class, 'login']);
 Route::post('/council/login', [CouncilAuthController::class, 'login']);
@@ -26,8 +31,8 @@ Route::post('/council/login', [CouncilAuthController::class, 'login']);
 Route::post('/kingdom/register', [KingdomAuthController::class, 'register']);
 Route::post('/council/register', [CouncilAuthController::class, 'register']);
 
-//rota pra criação das expedições
+//create expeditions
 Route::post('/expeditions', [ExpeditionController::class, 'store']);
 
-//rota pra decidir sobre a expedição que ja existe
+//decide expeditions already exist
 Route::patch('/expeditions/{protocol}/decision', [ExpeditionDecisionController::class, 'decide']);
