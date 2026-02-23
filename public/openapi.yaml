@@ -1,0 +1,397 @@
+openapi: 3.0.3
+info:
+  title: WebMania Expeditions API - Teste Técnico
+  version: 1.0.0
+  description: API para autenticação, criação, decisão e consulta de expedições.
+servers:
+  - url: http://127.0.0.1:8000/api
+tags:
+  - name: Auth
+  - name: Expeditions
+paths:
+  /kingdom/register:
+    post:
+      tags: [Auth]
+      summary: Registrar reino
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KingdomRegisterRequest'
+      responses:
+        '201':
+          description: Reino registrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+  /kingdom/login:
+    post:
+      tags: [Auth]
+      summary: Login do reino
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Token gerado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponseNoMessage'
+        '401':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+  /council/login:
+    post:
+      tags: [Auth]
+      summary: Login do conselho
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Token gerado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token]
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+  /council/register:
+    post:
+      tags: [Auth]
+      summary: Registrar conselheiro (apenas admin do conselho)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouncilRegisterRequest'
+      responses:
+        '201':
+          description: Conselheiro registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '403':
+          description: Sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+  /expeditions:
+    post:
+      tags: [Expeditions]
+      summary: Criar expedição
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExpeditionRequest'
+      responses:
+        '201':
+          description: Expedição criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpeditionCreatedResponse'
+        '422':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /expeditions/{protocol}/decision:
+    patch:
+      tags: [Expeditions]
+      summary: Decidir expedição (aprovar/rejeitar)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: protocol
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpeditionDecisionRequest'
+      responses:
+        '200':
+          description: Expedição avaliada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, status, conselheiro_avaliador]
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+                    enum: [APPROVED, REJECTED]
+                  conselheiro_avaliador:
+                    type: string
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '409':
+          description: Expedição já decidida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '422':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /expeditions/{protocol}/status:
+    get:
+      tags: [Expeditions]
+      summary: Consultar status da expedição por protocolo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: protocol
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpeditionStatusResponse'
+        '401':
+          description: Token inválido ou ausente
+        '422':
+          description: Protocolo inválido/não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+  schemas:
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+    ValidationErrorResponse:
+      type: object
+      required: [message, errors]
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    KingdomRegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+    CouncilRegisterRequest:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        role:
+          type: string
+          enum: [admin, member]
+    TokenResponse:
+      type: object
+      required: [message, access_token, token_type]
+      properties:
+        message:
+          type: string
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+    TokenResponseNoMessage:
+      type: object
+      required: [access_token, token_type]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+    CreateExpeditionRequest:
+      type: object
+      required: [kingdom_id, journey_description, participants, artifacts]
+      properties:
+        kingdom_id:
+          type: integer
+        journey_description:
+          type: string
+        participants:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [name, race]
+            properties:
+              name:
+                type: string
+              race:
+                type: string
+        artifacts:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [name, type]
+            properties:
+              name:
+                type: string
+              type:
+                type: string
+    ExpeditionDecisionRequest:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED]
+        rejection_reason:
+          type: string
+          description: Obrigatório quando decision for REJECTED.
+    ExpeditionCreatedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        protocol:
+          type: string
+        kingdom_id:
+          type: integer
+        journey_description:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantItem'
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArtifactItem'
+        singleParticipants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantItem'
+        singleArtifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArtifactItem'
+    ParticipantItem:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: integer
+            - type: string
+        expedition_id:
+          type: string
+        name:
+          type: string
+        race:
+          type: string
+    ArtifactItem:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: integer
+            - type: string
+        expedition_id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+    ExpeditionStatusResponse:
+      type: object
+      required: [protocol, status, last_updated_at]
+      properties:
+        protocol:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        last_updated_at:
+          type: string
+          format: date-time
+        rejection_reason:
+          type: string
