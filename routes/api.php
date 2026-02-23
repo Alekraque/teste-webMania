@@ -12,6 +12,9 @@ use App\Http\Controllers\Auth\KingdomAuthController;
 Route::post('/kingdom/login', [KingdomAuthController::class, 'login']);
 Route::post('/council/login', [CouncilAuthController::class, 'login']);
 
+//register
+Route::post('/kingdom/register', [KingdomAuthController::class, 'register']);
+
 //rota pra criação das expedições
 Route::post('/expeditions', [ExpeditionController::class, 'store']);
 
