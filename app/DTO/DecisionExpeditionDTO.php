@@ -8,7 +8,7 @@ class DecisionExpeditionDTO
 {
     public function __construct(
         public ExpeditionStatus $decision,
-        public ?string $decisionReason,
+        public ?string $rejectionReason,
         public int $councilMemberId,
     ) {}
 
@@ -16,7 +16,7 @@ class DecisionExpeditionDTO
     {
         return new self(
             decision: ExpeditionStatus::from($data['decision']),
-            decisionReason: $data['decision_reason'] ?? null,
+            rejectionReason: $data['rejection_reason'] ?? null,
             councilMemberId: $councilMemberId,
         );
     }

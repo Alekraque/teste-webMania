@@ -28,7 +28,7 @@ class DecideExpeditionUseCase
         $expedition->update([
             'status' => $input->decision->value,
             'rejection_reason' => $input->decision === ExpeditionStatus::REJECTED
-                ? $input->decisionReason
+                ? $input->rejectionReason
                 : null,
             'decision_by' => $input->councilMemberId,
             'decided_at' => now(),

@@ -6,6 +6,15 @@ use App\Domain\Enums\ExpeditionStatus;
 
 class DecisionExpeditionRequest extends ApiFormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('decision_reason') && ! $this->has('rejection_reason')) {
+            $this->merge([
+                'rejection_reason' => $this->input('decision_reason'),
+            ]);
+        }
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -21,15 +30,17 @@ class DecisionExpeditionRequest extends ApiFormRequest
                     ExpeditionStatus::REJECTED->value,
                 ]),
             ],
-            'decision_reason' => [
-                'nullable',
+            'rejection_reason' => [
+                'required_if:decision,' . ExpeditionStatus::REJECTED->value,
                 'string',
-                function ($attribute, $value, $fail): void {
-                    if ($this->input('decision') === ExpeditionStatus::REJECTED->value && empty($value)) {
-                        $fail('A justificativa é obrigatória quando a expedição for rejeitada.');
-                    }
-                },
             ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'rejection_reason.required_if' => 'A justificativa é obrigatória quando a expedição for rejeitada.',
         ];
     }
 }

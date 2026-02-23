@@ -6,10 +6,12 @@ use App\Application\UseCases\DecideExpeditionUseCase;
 use App\DTO\DecisionExpeditionDTO;
 use App\Domain\Enums\ExpeditionStatus;
 use App\Domain\Exceptions\ExpeditionStatusTransitionNotAllowedException;
+use App\Http\Requests\DecisionExpeditionRequest;
 use App\Models\CouncilMember;
 use App\Models\Expedition;
 use App\Models\Kingdom;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 class ExpeditionStatusRuleTest extends TestCase
@@ -44,7 +46,7 @@ class ExpeditionStatusRuleTest extends TestCase
             $expedition->protocol,
             new DecisionExpeditionDTO(
                 decision: ExpeditionStatus::APPROVED,
-                decisionReason: null,
+                rejectionReason: null,
                 councilMemberId: $councilMember->id,
             )
         );
@@ -57,9 +59,23 @@ class ExpeditionStatusRuleTest extends TestCase
             $expedition->protocol,
             new DecisionExpeditionDTO(
                 decision: ExpeditionStatus::REJECTED,
-                decisionReason: 'Mudança indevida após aprovação',
+                rejectionReason: 'Mudança indevida após aprovação',
                 councilMemberId: $councilMember->id,
             )
         );
+    }
+
+    public function test_rejection_reason_is_required_when_decision_is_rejected(): void
+    {
+        $request = new DecisionExpeditionRequest();
+
+        $validator = Validator::make(
+            ['decision' => ExpeditionStatus::REJECTED->value],
+            $request->rules(),
+            $request->messages()
+        );
+
+        $this->assertTrue($validator->fails());
+        $this->assertArrayHasKey('rejection_reason', $validator->errors()->toArray());
     }
 }
