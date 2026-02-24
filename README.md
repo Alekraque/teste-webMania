@@ -1,60 +1,136 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## WebMania Expeditions API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST desenvolvida em Laravel para o teste técnico da WebMania, responsável por:
 
-## About Laravel
+- **Autenticar reinos e conselheiros**
+- **Registrar expedições**
+- **Permitir que o Conselho aprove ou rejeite expedições**
+- **Consultar o status de uma expedição por protocolo**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+A modelagem completa da solução (análise, arquitetura, riscos, etc.) está descrita em `ANALISE.MD`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Resumo do Projeto
 
-## Learning Laravel
+- **Contexto:** Responder ao chamado dos Reinos da Terra-média ao Conselho de Elrond, substituindo o modelo de cartas por uma API REST estruturada.
+- **Objetivo principal:** Padronizar o registro, decisão e acompanhamento de expedições oficiais.
+- **Pilares da solução:**
+  - Segurança via autenticação com tokens (Laravel Sanctum)
+  - Rastreamento por protocolo único de expedição
+  - Decisão explícita de expedições (APPROVED / REJECTED)
+  - Documentação formal via OpenAPI (Swagger)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Documentação da API (Swagger)
 
-## Laravel Sponsors
+- **URL local da documentação Swagger (interface):**  
+  `http://127.0.0.1:8000/docs`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Especificação OpenAPI (arquivo YAML servido pela aplicação):**  
+  `http://127.0.0.1:8000/openapi.yaml`
 
-### Premium Partners
+- **Servidor base definido na especificação:**  
+  `http://127.0.0.1:8000/api`
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Abra `http://127.0.0.1:8000/docs` após subir o servidor Laravel para visualizar, testar as rotas e inspecionar os contratos de request/response.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Rotas HTTP da API
 
-## Code of Conduct
+Base das rotas de API: `http://127.0.0.1:8000/api`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Autenticação
 
-## Security Vulnerabilities
+- **Registrar reino**
+  - **POST** `/api/kingdom/register`  
+  - **Descrição:** Cria um novo reino e retorna um token de autenticação.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- **Login do reino**
+  - **POST** `/api/kingdom/login`  
+  - **Descrição:** Autentica um reino e retorna um `access_token` (Bearer).
 
-## License
+- **Login do conselho**
+  - **POST** `/api/council/login`  
+  - **Descrição:** Autentica um conselheiro do Conselho de Elrond e retorna `access_token`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# teste-webMania
+- **Registrar conselheiro (apenas admin)**
+  - **POST** `/api/council/register`  
+  - **Descrição:** Cria um novo conselheiro (perfil admin ou member).  
+  - **Auth:** Bearer token de um conselheiro administrador.
+
+### Expedições
+
+- **Criar expedição**
+  - **POST** `/api/expeditions`  
+  - **Descrição:** Cria uma nova expedição vinculada a um reino.  
+  - **Body (exemplo simplificado):**
+    ```json
+    {
+      "kingdom_id": 2,
+      "journey_description": "Expedição ao Deserto de Zhar para recuperar o Orbe Solar",
+      "participants": [
+        { "name": "Lyra Windfall", "race": "Humana" }
+      ],
+      "artifacts": [
+        { "name": "Orbe Solar", "type": "Relic" }
+      ]
+    }
+    ```
+
+- **Decidir expedição (aprovar/rejeitar)**
+  - **PATCH** `/api/expeditions/{protocol}/decision`  
+  - **Descrição:** Permite ao Conselho aprovar ou rejeitar uma expedição existente.  
+  - **Auth:** Bearer token de conselheiro.  
+  - **Path params:** `protocol` – identificador único da expedição.  
+
+- **Consultar status da expedição por protocolo**
+  - **GET** `/api/expeditions/{protocol}/status`  
+  - **Descrição:** Retorna o status atual da expedição (ex.: `PENDING`, `APPROVED`, `REJECTED`) e informações relacionadas.  
+  - **Auth:** Bearer token (reino dono da expedição ou conselheiro).
+
+> Para detalhes completos de payloads, códigos de resposta e exemplos, consulte o Swagger em `http://127.0.0.1:8000/docs` ou o arquivo `public/openapi.yaml`.
+
+---
+
+## Como rodar o projeto (local)
+
+- **1. Instalar dependências PHP**
+  ```bash
+  composer install
+  ```
+
+- **2. Configurar ambiente**
+  ```bash
+  cp .env.example .env
+  php artisan key:generate
+  # Ajuste as credenciais de banco no .env
+  ```
+
+- **3. Rodar migrations**
+  ```bash
+  php artisan migrate
+  ```
+
+## Ordem Recomendada das Migrations (por dependência de FK)
+1. `database/migrations/2026_02_20_211926_create_kingdoms_table.php`
+2. `database/migrations/2026_02_20_212723_create_council_members_table.php`
+3. `database/migrations/2026_02_20_211136_create_expeditions_table.php`
+4. `database/migrations/2026_02_20_231127_create_expedition_participants_table.php`
+5. `database/migrations/2026_02_20_231346_create_expedition_artifacts_table.php`
+6. `database/migrations/2026_02_22_052737_create_participants_table.php`
+7. `database/migrations/2026_02_22_052923_create_artifacts_table.php`
+8. `database/migrations/2026_02_22_094930_create_personal_access_tokens_table.php`
+9. `database/migrations/2026_02_23_023837_add_role_to_council_members_table.php`
+
+
+- **4. Subir o servidor**
+  ```bash
+  php artisan serve
+  ```
+
+Com o servidor rodando:
+- API disponível em: `http://127.0.0.1:8000/api`
+- Swagger UI em: `http://127.0.0.1:8000/docs`
