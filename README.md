@@ -109,6 +109,42 @@ Base das rotas de API: `http://127.0.0.1:8000/api`
   # Ajuste as credenciais de banco no .env
   ```
 
+### Banco de Dados (PostgreSQL) e Variáveis de Ambiente
+
+- **Banco de dados utilizado:** PostgreSQL
+- **Driver Laravel:** `DB_CONNECTION=pgsql`
+
+As variáveis de ambiente de banco de dados seguem o padrão definido em `.env.example` (linhas 23–28) e **devem apontar para uma instância PostgreSQL válida**:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=seu_banco_postgres
+DB_USERNAME=seu_usuario_postgres
+DB_PASSWORD=sua_senha_postgres
+```
+
+**Alertas importantes sobre configuração:**
+
+- **`DB_CONNECTION`**  
+  - Deve ser `pgsql`. Se estiver como `mysql` (padrão do Laravel) ou outro driver, as migrations e a aplicação **não funcionarão corretamente**.
+
+- **`DB_PORT`**  
+  - Em ambientes padrão PostgreSQL use `5432`. Se a porta do seu servidor for diferente, atualize aqui, mas **garanta que o valor bate com a configuração real do Postgres**.
+
+- **`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`**  
+  - Devem existir no servidor PostgreSQL. Caso estejam incorretos, você verá erros de conexão ao rodar `php artisan migrate` ou ao subir a aplicação.
+
+- **`SESSION_DRIVER` (no `.env`)**  
+  - Para este projeto, o valor esperado é:
+    ```env
+    SESSION_DRIVER=file,
+    CACHE_STORE=file
+    ```
+  - Se você alterar para `database`, `redis` ou outro driver, será necessário configurar as respectivas tabelas/serviços. Caso contrário, **login, autenticação e rotas protegidas poderão falhar de forma imprevisível**.
+
+
 - **3. Rodar migrations**
   ```bash
   php artisan migrate
